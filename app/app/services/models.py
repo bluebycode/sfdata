@@ -14,7 +14,6 @@ def initialization(dbConnector):
     global db
     db = dbConnector
    
- 
 def runQuery(query, withCoordinates = None):
     start = timer()
     session = db.connect()

@@ -73,7 +73,7 @@ with app.app_context():
     def loadDistricts():
         return get_all_districts()
 
-
+@cache.cached(timeout=15000, key_prefix='generated_maps_%s')
 @app.route('/generated_map/<attributes>')
 def mapWithAttributes(attributes=None):
     attributesJson = base64.b64decode(attributes).decode('utf-8')
@@ -116,7 +116,6 @@ def absolute():
     print("application\t[/]\t")
     start = timer()    
     sample = get_overall(year=YEAR, limit=LIMIT)
-    print(sample)
     print("[/] Query: allIncidents... %0.5f secs."  % (timer() - start))
     sfMap = generate_map(sample);
     sfMap.save('templates/generated_map.html')
