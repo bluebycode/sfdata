@@ -58,7 +58,9 @@ def create_app():
         init_cache_layout(app)
     return app
 
-CASSANDRA_IP = '10.16.0.13'
+import os
+print("*****************************", os.environ['CASSANDRA_HOST'])
+CASSANDRA_IP = os.environ.get('CASSANDRA_HOST') 
 
 app = create_app()
 app.config['CASSANDRA_NODES'] = [CASSANDRA_IP]
