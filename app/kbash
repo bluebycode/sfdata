@@ -1,0 +1,2 @@
+id=`kubectl get pods|grep app|awk '{print $1}'`
+kubectl exec -it $id -- /bin/bash
