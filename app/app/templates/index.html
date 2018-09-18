@@ -1,0 +1,46 @@
+{% extends "layout_bootstrap.html" %}
+{% block title %} Test {% endblock %}
+{% block head %} {{ super() }} {% endblock %}
+{% block body %}
+<section class="bg-primary text-white mb-0" id="path">
+    <div class="container">
+        <h1 class="text-center text-uppercase text-white">San Francisco</h2>
+        <hr class="star-light mb-5">
+        
+        <div class="row">
+            <div class="input-group" style="
+                    width: 750px;
+                    margin-left: 210px;
+                ">
+                <input type="text" class="form-control" name="tags" id="category" data-role="tagsinput">
+                <div class="input-group-btn"> 
+                    <button id="selectYear" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                    style="margin-left: -5px;"> 
+                        2017
+                        <span class="caret"></span> 
+                        <span class="sr-only">Toggle Dropdown</span> 
+                    </button> 
+                    <ul id="selectYearSelections" class="dropdown-menu dropdown-menu-right"> 
+                        <li><a href="#" selected="selected">2017</a></li> 
+                        <li><a href="#">2016</a></li>
+                        <li><a href="#">2015</a></li>
+                    </ul> 
+                </div>
+            </div>
+        </div>
+    
+        <div class="row" style="margin-top: 4px;">
+            <div id="map" style="width: 750px; height: 550px; margin-top: 20x;margin: 0 auto" >
+                <iframe id="map-frame" frameborder='0' noresize='noresize' 
+                    style='position: absolute; background: transparent; width: 750px; height:550px;' 
+                    src="generated_map" frameborder="0"></iframe>
+            </div>
+        </div>
+        <br>
+        <h6 class="text-center text-white" >2018 · vrandkode
+    </h6>
+    </div>
+</section>
+
+
+{% endblock %}
