@@ -99,8 +99,7 @@ truncate sf.bycategory;
 
 COPY sf.overall(incidentId, category, description, dayoftheweek, time, day,year,month, hour, district, resolution, address,x,y,location, subid) 
 FROM '/opt/datasets/incidents.all.csv' 
-WITH DELIMITER=';' and HEADER=false and DATETIMEFORMAT='%Y-%m-%d %H:%M:%S'  WITH CHUNKSIZE=10000;
-
+WITH DELIMITER=';' and HEADER=false and DATETIMEFORMAT='%Y-%m-%d %H:%M:%S' and CHUNKSIZE=20000;
 
 COPY sf.overall (year, district, incidentId, subid, address, category, dayoftheweek, description, location, resolution, time, month, day, hour,x,y) 
 TO 'tmp_incidents.csv';
