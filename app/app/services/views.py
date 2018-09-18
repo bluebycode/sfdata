@@ -56,7 +56,6 @@ def generate_map(data, feature=False, year=2017):
     sfMap = folium.Map(location=start_coords, zoom_start=12)
     start = timer()
     total_start = start;
-    print(data)
 
     if (feature is None):
         print("    generateMap: without feature")

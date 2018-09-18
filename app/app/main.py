@@ -47,8 +47,6 @@ def init_cache_layout(application):
 def init_services():
     initialization(cassandra)
     testing_models()
-    cache = Cache(app,config={'CACHE_TYPE': 'simple'})
-    cache.init_app(app)
 
 def create_app():
     app = Flask(__name__)
@@ -59,7 +57,7 @@ def create_app():
     return app
 
 import os
-print("*****************************", os.environ['CASSANDRA_HOST'])
+print("***************************** CASSANDRA_HOST:\t", os.environ['CASSANDRA_HOST'])
 CASSANDRA_IP = os.environ.get('CASSANDRA_HOST') 
 
 app = create_app()
@@ -100,6 +98,7 @@ def map(attributes=None):
     else:
         return render_template('generated/generated_map_%s.html' % attributes)
 
+@cache.cached(timeout=15000, key_prefix='attributes_json')
 @app.route('/data/attributes.json')
 def districts():
     attributes = []
@@ -111,8 +110,14 @@ def districts():
 def healtcheck():
     return "OK, cassandra: %s" % CASSANDRA_IP
 
+@cache.cached(timeout=300, key_prefix='absolute_path')
 @app.route("/")
 def absolute():
+    if request.headers is not None:
+        print(request.headers)
+        if 'User-Agent' in request.headers and request.headers['User-Agent'] == 'GoogleHC/1.0':
+            return "OK, cassandra: %s" % CASSANDRA_IP
+
     print("application\t[/]\t")
     start = timer()    
     sample = get_overall(year=YEAR, limit=LIMIT)
