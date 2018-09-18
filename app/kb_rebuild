@@ -1,0 +1,10 @@
+declare -i n num && n=`cat version |sed -E "s/[0-9]+\.([0-9]+)/\1/g"`
+version=`cat version`
+docker build -t gcr.io/$PROJECT_ID/sfapp:v$version .
+gcloud docker -- push gcr.io/$PROJECT_ID/sfapp:v$version
+kubectl delete deployment sfapp
+kubectl run sfapp --image=gcr.io/$PROJECT_ID/sfapp:v$version --env="CASSANDRA_HOST=10.16.0.13"
+n+=1 && echo $n
+v=`cat version |sed -E "s/\.([0-9]+)/\.$n/g"`
+echo "$v" > version
+cat version
