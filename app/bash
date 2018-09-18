@@ -1,0 +1,3 @@
+id=`docker ps|grep sfapp|awk '{print $1}'`
+echo "container id: $id"
+docker exec -i -t $id /bin/bash
