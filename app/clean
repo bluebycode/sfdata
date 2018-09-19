@@ -1,2 +1,0 @@
-docker ps|grep sfapp|cut -d " " -f1 |xargs docker stop
-docker ps|grep sfapp|cut -d " " -f1 |xargs docker rm

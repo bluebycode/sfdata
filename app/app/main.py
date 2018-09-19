@@ -57,9 +57,14 @@ def create_app():
     return app
 
 import os
-print("***************************** CASSANDRA_HOST:\t", os.environ['CASSANDRA_HOST'])
+
+print("Initialisation...")
+print("* CASSANDRA_HOST:\t", os.environ['CASSANDRA_HOST'])
 CASSANDRA_IP = os.environ.get('CASSANDRA_HOST') 
 
+""" Inicialización de la aplicación: servicios y configuración. 
+    Haciendo prefetching de la información necesaria para el filtrado
+    por tags """
 app = create_app()
 app.config['CASSANDRA_NODES'] = [CASSANDRA_IP]
 with app.app_context():
@@ -71,9 +76,15 @@ with app.app_context():
     def loadDistricts():
         return get_all_districts()
 
+
 @cache.cached(timeout=15000, key_prefix='generated_maps_%s')
 @app.route('/generated_map/<attributes>')
 def mapWithAttributes(attributes=None):
+    """ Necesario para renderizar un mapa con unos ajustes personalizados dados por los atributos
+    codificados mediante la parte de cliente (js): json -> base64.
+    La función esta cacheada en base al token generado (attributes) por lo que cada petición
+    con las mismas características son guardadas en memoria sin necesidad de realizar carga
+    sobre la base de datos """
     attributesJson = base64.b64decode(attributes).decode('utf-8')
     variables = json.loads(attributesJson)
     start = timer()
@@ -82,6 +93,9 @@ def mapWithAttributes(attributes=None):
     byYear = 2017
     if 'year' in variables:
         byYear = int(variables['year'])
+
+    # Generamos el map e indicamos el template a utilizar si se
+    # indicó un año determinado.
     print("[/generated_map/%s] year %s", attributes, byYear)
     sfMap = generate_map(sample, year=byYear);
     if (attributes == None):
@@ -93,14 +107,17 @@ def mapWithAttributes(attributes=None):
 
 @app.route('/generated_map')
 def map(attributes=None):
+    """ Renderizado del mapa existente """
     if (attributes == None):
         return render_template('generated_map.html')
     else:
         return render_template('generated/generated_map_%s.html' % attributes)
 
-@cache.cached(timeout=15000, key_prefix='attributes_json')
+
 @app.route('/data/attributes.json')
 def districts():
+    """ Prefetching de los atributos distritos y categorias necesarios para
+    el componente de tags """
     attributes = []
     attributes.extend(loadDistricts())
     attributes.extend(loadCategories())
@@ -113,11 +130,14 @@ def healtcheck():
 @cache.cached(timeout=300, key_prefix='absolute_path')
 @app.route("/")
 def absolute():
+    # @todo. Si google loadbalancer hace healtcheck sobre / es necesario realizar este cambio para
+    # evitar la carga.
     if request.headers is not None:
         print(request.headers)
         if 'User-Agent' in request.headers and request.headers['User-Agent'] == 'GoogleHC/1.0':
             return "OK, cassandra: %s" % CASSANDRA_IP
 
+    # Obtiene y renderiza el mapa con la información inicial sin filtros.
     print("application\t[/]\t")
     start = timer()    
     sample = get_overall(year=YEAR, limit=LIMIT)

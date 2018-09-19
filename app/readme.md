@@ -33,7 +33,12 @@ gcloud container clusters create sfcappcluster --num-nodes=1
 References: https://cloud.google.com/kubernetes-engine/docs/tutorials/http-balancer
 ```
 kubectl run sfapp --image=gcr.io/$PROJECT_ID/sfapp:v1 --port 80
+```
+
+# Configure loadbalancing
+```
 kubectl expose deployment sfapp --target-port=80 --type=NodePort
+kubectl apply -f basic-ingress.yaml
 ```
 
 * Accesses

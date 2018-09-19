@@ -7,17 +7,18 @@ import pandas as pd
 db = None
 session = None
 
-def testing_models():
-    print("testing models")
-
 def initialization(dbConnector):
+    """ Inicializacion del servicio con el conector a Cassandra """
     global db
     db = dbConnector
    
 def runQuery(query, withCoordinates = None):
+    """ Funcion auxiliar para obtener los datos encapsulados mediante objetos Panda
+        una vez obtenidos de la base de datos """
     start = timer()
     session = db.connect()
     data = pd.DataFrame(list(session.execute(query)))
+    # @todo: mover la transformación fuera de esta función
     if withCoordinates is not None and not data.empty:
         data['X'] = data['x'].astype('float64')
         data['Y'] = data['y'].astype('float64')
@@ -25,6 +26,8 @@ def runQuery(query, withCoordinates = None):
     return data
 
 def load(attribute, group, year=2017):
+    """ Devuelve mediante listas de objetos de atributos los pares de distritos y categorias especificadas en el argumento
+        delegando la petición a la base de datos """
     attributes_raw = runQuery("select %s from sf.by%s WHERE year=%d group by %s" % (attribute,attribute,year,attribute))
     attributes_list = [item for sublist in attributes_raw.values.tolist() for item in sublist]
     return [ { "value": (group*20)+i, "text": x.lower(), "attribute": attribute} for i, x in enumerate(attributes_list)]
@@ -42,6 +45,7 @@ def get_per_district(year=2017):
     return runQuery("select district, count(*) from sf.bydistrict where year=%d group by district" % year)
 
 def buildQueryByAttribute(filterByCategories=None, filterBydDistricts=None, filterByYear=None):
+    """ Selecciona el tipo de consulta necesaria en acorde al atributo/familia """
     inExpression = ""
     tableName = "overall"
 
@@ -66,7 +70,6 @@ def buildQueryByAttribute(filterByCategories=None, filterBydDistricts=None, filt
 def getAttributeDefault(attrs, attributeName, defaultValue = None):
     if (attributeName not in attrs):
         return defaultValue
-
     if (hasattr(attrs[attributeName], 'lower')):
         return attrs[attributeName]
     elif len(attrs[attributeName])>0:
@@ -74,6 +77,7 @@ def getAttributeDefault(attrs, attributeName, defaultValue = None):
     return defaultValue
 
 def get_by_attributes(attrs, limit=None):
+    """ Obtiene la información filtrada por los tipo de atributos o familias """
     filterByCategories = getAttributeDefault(attrs, 'category', None)
     filterBydDistricts = getAttributeDefault(attrs, 'district', None)
     filterByYear = getAttributeDefault(attrs, 'year', 2017)

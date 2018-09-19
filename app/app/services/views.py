@@ -7,10 +7,11 @@ from folium import plugins
 
 from services.models import testing_models, get_overall, get_per_district
 
+# Las coordenadas de la zona central del mapa de San Francisco
 start_coords = (37.778209, -122.450070)
 
 def create_marker(row, popup=None):
-    """Returns a L.marker object"""
+    """Funcion auxiliar que proporciona el marcador en la zona del mapa"""
     icon = L.AwesomeMarkers.icon({markerColor: row.color})    
     marker = L.marker(L.LatLng(row.Y, row.X))
     marker.setIcon(icon)
@@ -20,7 +21,10 @@ def create_marker(row, popup=None):
 
 from folium.plugins import MarkerCluster
 
+
 class MarkerClusterScript(MarkerCluster):
+    """ Extensión al objeto de Leaflet para agilizar la carga de los marcadores
+        y reducir el tiempo de carga """
     def __init__(self, data, callback, popup=None):
         from jinja2 import Template
         super(MarkerClusterScript, self).__init__([])
@@ -53,6 +57,8 @@ class MarkerClusterScript(MarkerCluster):
                         """)
 
 def generate_map(data, feature=False, year=2017):
+    """ Utiliza el framework Folium para generar el html con la información obtenida 
+        de la base de datos. """
     sfMap = folium.Map(location=start_coords, zoom_start=12)
     start = timer()
     total_start = start;
@@ -87,7 +93,8 @@ def generate_map(data, feature=False, year=2017):
     #else:
     #    incidentsCountPerDistrict = []
 
-    # creation of the choropleth
+    # Choropleth. Proporciona las secciones coloreadas para
+    # cada distrito
     sfMap.choropleth(geo_data = district_geo, 
                 name = "Incidents per district",
                 data = incidentsCountPerDistrict,
