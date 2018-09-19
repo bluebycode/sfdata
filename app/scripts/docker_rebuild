@@ -1,0 +1,11 @@
+appId=`docker ps -a|grep sfapp |awk '{print $1}'`
+docker stop $appId \
+	&& docker rm $appId
+
+docker build -t sfapp . \
+	&& docker run -p 80:80 --name sfapp \
+	-e CASSANDRA_HOST='172.17.0.2' \
+        --ulimit nofile=100000:100000 \
+        --ulimit nproc=32768 \
+        --memory-swappiness -1 \
+        sfapp
