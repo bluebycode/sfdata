@@ -26,7 +26,12 @@ Requirements:
 export PROJECT_ID="$(gcloud config get-value project -q)"
 docker build -t gcr.io/$PROJECT_ID/sfcassandra:v1 .
 gcloud docker -- push gcr.io/$PROJECT_ID/sfcassandra:v1
+
+
+# creating cluster https://cloud.google.com/sdk/gcloud/reference/container/clusters/create
 gcloud container clusters create sfcassandracluster --num-nodes=1
+or
+gcloud container clusters create sfcassandracluster --machine-type=n1-highmem-2 --num-nodes=1
 ```
 
 * Remote deployment
@@ -43,6 +48,6 @@ id=`kubectl get pods|grep cassandra|awk '{print $1}'`
 kubectl exec -it $id -- bin/bash
 kubectl exec -it $id -- sh -c 'nodetool status'
 kubectl exec -it $id  -- sh -c 'exec cqlsh 10.32.0.12'
-
+10.16.0.27
 ```
 
