@@ -2,6 +2,9 @@
 
 _Representación de crímenes en San Francisco mediante una aplicación web con **#Flask** and **#Folium**. Entre otras tecnologias de desarrollo frontend/backend usadas se encuentran **#bootstrap3** **#python** **#javascript** **#leaftlet**. Para el despliegue en local o en la nube (**Google Cloud**) se añaden indicaciones y procedimientos mediante **#docker** y/o **#kubernetes**._
 
+
+<p style="font-size: 16pt;text-align: center;"><a>http://sfdata.vrandkode.net</a></p>
+
 Es una representación minimalista de una zona amplia geográfica de la ciudad de **San Francisco**. Los **distritos** son remarcados en el mapa con un índice de peligrosidad/riesgo (densidad de incidencias por zona). Desde la barra de navegación se puede actualizar la información de los marcadores de incidencias del mapa. Mediante la elección de etiquetas ("tags") de los tipos de **distrito** o tipo de **incidencia** la información será de una forma u otra acotada en acorde al criterio construido.
 
 ### Tecnologías usadas
