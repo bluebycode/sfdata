@@ -5,7 +5,7 @@ from timeit import default_timer as timer
 import folium
 from folium import plugins
 
-from services.models import testing_models, get_overall, get_per_district
+from services.models import get_overall, get_per_district
 
 # Las coordenadas de la zona central del mapa de San Francisco
 start_coords = (37.778209, -122.450070)

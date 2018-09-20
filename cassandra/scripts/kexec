@@ -1,0 +1,2 @@
+cassandraId=`kubectl get pods|grep cassandra|awk '{print $1}'`
+kubectl exec -it $cassandraId -- sh -c "$1"

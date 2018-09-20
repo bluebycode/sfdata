@@ -24,7 +24,7 @@ import io
 sio = BytesIO() 
 
 """ Application services """
-from services.models import testing_models, initialization, get_overall, get_by_attributes, get_all_districts, get_all_categories
+from services.models import initialization, get_overall, get_by_attributes, get_all_districts, get_all_categories
 from services.views import generate_map
 
 YEAR = 2017
@@ -46,7 +46,6 @@ def init_cache_layout(application):
 
 def init_services():
     initialization(cassandra)
-    testing_models()
 
 def create_app():
     app = Flask(__name__)
