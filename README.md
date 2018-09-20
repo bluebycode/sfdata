@@ -2,14 +2,17 @@
 
 _Representación de información de crímenes e incidencias del Departamento policial en la ciudad de **San Francisco** a través de una aplicación web con la ayuda de **#Flask** and **#Folium**. Entre otras tecnologias de desarrollo frontend/backend usadas se encuentran **#bootstrap3** **#python** **#javascript** **#leaftlet**. Para el despliegue en local o en la nube (**Google Cloud**) se añaden indicaciones y procedimientos mediante **#docker** y/o **#kubernetes**._
 
-
-<p style="font-size: 16pt;text-align: center;"> <a>http://sfdata.vrandkode.net</a></p>
+<h2 align="center"> http://sfdata.vrandkode.net </h1>
 
 Es una representación minimalista de la ciudad de **San Francisco**. Los **distritos** son remarcados en el mapa con un índice de peligrosidad/riesgo (densidad de incidencias por zona).
 
 Desde la barra de navegación se puede actualizar la información de los marcadores de incidencias del mapa. Mediante la elección de etiquetas (![tag](./docs/tag.png)) de **distritos** o tipo de **incidencias** la información será de una forma u otra acotada en acorde al criterio construido. Si añadimos las etiquetas de los distritos: _northern_ y _sourthern_ "Norte y Sur", y las incidencias de categoria _assault_ "asalto" estamos solicitando información de los asaltos producidos en ambas zonas, Norte y Sur, de la ciudad.
 
-![SF](./docs/sfdemo.gif)
+<p align="center">
+  <a href="#">
+    <img width=100% src="docs/sfdemo.gif">
+  </a>
+</p>
 
 # Tabla de contenido
 
