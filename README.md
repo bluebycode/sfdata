@@ -100,13 +100,14 @@ cluster.addMarker(...)
 
 Se han definido los siguientes endpoints de acceso:
 
-### ```/``` (principal)
+#### ```/```
 
   * Peticiones para obtener información de todos **los distritos y tipos de delitos disponibles**.
 
   * **Genera la información y renderiza el mapa** sobre el html *generated_map.html* cargado a su vez desde el componente **iframe** de index.html. El mapa renderizado contendrá los marcadores de las incidencias producidas por zona.
 
-### ```/generated_map/<attribute>``` Al añadir una etiqueta (distrito/tipo de delito) se obtiene la información filtrada bajo cierto criterio. 
+#### ```/generated_map/<attribute>``` 
+Al añadir una etiqueta (distrito/tipo de delito) se obtiene la información filtrada bajo cierto criterio. 
 
 1. Si añadimos las etiquetas _northern_, _bayview_ y _assault_La expresión es construida como json.
 
