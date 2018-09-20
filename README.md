@@ -1,58 +1,145 @@
 # San Francisco Crimes
 
-_Representación de crímenes en San Francisco mediante una aplicación web con **#Flask** and **#Folium**. Entre otras tecnologias de desarrollo frontend/backend usadas se encuentran **#bootstrap3** **#python** **#javascript** **#leaftlet**. Para el despliegue en local o en la nube (**Google Cloud**) se añaden indicaciones y procedimientos mediante **#docker** y/o **#kubernetes**._
+_Representación de información de crímenes e incidencias del Departamento policial en la ciudad de **San Francisco** a través de una aplicación web con la ayuda de **#Flask** and **#Folium**. Entre otras tecnologias de desarrollo frontend/backend usadas se encuentran **#bootstrap3** **#python** **#javascript** **#leaftlet**. Para el despliegue en local o en la nube (**Google Cloud**) se añaden indicaciones y procedimientos mediante **#docker** y/o **#kubernetes**._
 
 
-<p style="font-size: 16pt;text-align: center;"><a>http://sfdata.vrandkode.net</a></p>
+<p style="font-size: 16pt;text-align: center;"> <a>http://sfdata.vrandkode.net</a></p>
 
-Es una representación minimalista de una zona amplia geográfica de la ciudad de **San Francisco**. Los **distritos** son remarcados en el mapa con un índice de peligrosidad/riesgo (densidad de incidencias por zona). Desde la barra de navegación se puede actualizar la información de los marcadores de incidencias del mapa. Mediante la elección de etiquetas ("tags") de los tipos de **distrito** o tipo de **incidencia** la información será de una forma u otra acotada en acorde al criterio construido.
+Es una representación minimalista de la ciudad de **San Francisco**. Los **distritos** son remarcados en el mapa con un índice de peligrosidad/riesgo (densidad de incidencias por zona).
 
-### Tecnologías usadas
-
-* Flask (python web)
-* Leaflet (maps with avg)/ Folium (python framework)
-* Bootstrap v3.0 (visual web components)
-* Docker (local)/ Kubernetes (Google Cloud)
+Desde la barra de navegación se puede actualizar la información de los marcadores de incidencias del mapa. Mediante la elección de etiquetas (![tag](./docs/tag.png)) de **distritos** o tipo de **incidencias** la información será de una forma u otra acotada en acorde al criterio construido. Si añadimos las etiquetas de los distritos: _northern_ y _sourthern_ "Norte y Sur", y las incidencias de categoria _assault_ "asalto" estamos solicitando información de los asaltos producidos en ambas zonas, Norte y Sur, de la ciudad.
 
 ![SF](./docs/sfdemo.gif)
 
-* [Visualización de datos sobre mapas mediante Leaflet/Folium](#)
-* [Estructuras de datos en Cassandra](#)
+# Tabla de contenido
 
-* [Arquitectura](#)
+## **Introducción**
 
-* [Despliegue en **local** mediante **Docker**](#)
+* [Tecnologías usadas](#tecnologias-usadas)
+* [Visualización de datos sobre mapas mediante **Leaflet/Folium**](#)
+* Arquitectura
+    * [Estructuras de datos en Cassandra](#)
+    * [Infrastructura](#)
+
+## **Uso y despliegue**
+
+* [Instalación, configuración y arranque en un entorno local](#)
+* [**Docker**. Despliegue en un entorno **local** o de desarrollo](#)
     * [Requisitos](#requisitos-para-el-entorno-docker)
-    * [Construir y desplegar un nodo Cassandra ](#)
+    * [Construir y desplegar *N nodos* de Cassandra ](#)
     * [Construir y desplegar la aplicación web](#)
 
-* [Despliegue en **Google Cloud** mediante **Kubernetes**](#)
+* [**Kubernetes**. Despliegue en **Google Cloud**](#)
     * [Requisitos](#requisitos-para-el-entorno-kubernetes)
     * [Construir y desplegar nodos Cassandra ](#)
     * [Construir y desplegar la aplicación web ](#)
 
 [·volver·](#San.Francisco-Crimes)
 
-## Visualización de datos sobre mapas mediante Leaflet/Folium
 
-*Folium* es un framework para Python que facilita y generar mapas interactivos mediante *Leaflet* desde el *backend*. Los mapas son renderizados sobre html, por lo que no es necesario construir ni representar información desde la parte *frontend* de la aplicación.
+# Introducción
+## Tecnologías usadas
+
+* Flask (python web)
+* Leaflet (maps with avg)/ Folium (python framework)
+* Bootstrap v3.0 (visual web components)
+* Docker (local)/ Kubernetes (Google Cloud)
+
+
+## **Vistas**. Visualización de datos sobre mapas mediante Leaflet/Folium
+
+*Folium* es un framework para Python que facilita y genera mapas interactivos mediante *Leaflet* desde el *backend*. Los mapas son renderizados en html, por lo que no es necesario construir ni representar información desde la parte *frontend* de la aplicación. Son generadas por Folium como componentes de Leaflet para construir mapas interactivos:
+
+
+### 1. **folium.Map** genera los componentes principales para el mapa.
+
+```html
+<div class="folium-map" id="map_6b72bfb74a8247ad8e37dc3da754fc41"></div>
+```
+
+Inicializa el mapa en el componente div de forma centrada y dado un nivel de zoom ([L.map](https://leafletjs.com/reference-1.3.4.html#map-example)):
+
+```js
+var map = L.map('map_6b72bfb74a8247ad8e37dc3da754fc41',
+    {   center: [37.778209,-122.45007],
+        zoom: 12,
+        maxBounds: bounds,
+        layers: [],
+        worldCopyJump: false,
+        crs: L.CRS.EPSG3857
+    });
+```
+
+Se añaden las capas y los niveles de zoom disponibles para generar las partes del mapa necesarias para componer el mapa general ([L.tileLayer](https://leafletjs.com/reference-1.3.4.html#tilelayer)):
+```js
+var tile_layer = L.tileLayer(
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+        "attribution": null,
+        "detectRetina": false,
+        "maxZoom": 18,
+        "minZoom": 1,
+        "noWrap": false,
+        "subdomains": "abc"
+        }
+    ).addTo(map);
+```
+
+### 2. **folium.plugins.MarkerCluster** o/y la clase **FastMarkerCluster** se encargan de generar y añadir los marcadores con la información obtenida del dataset.
+
+**L.markerClusterGroup** es una extensión para añadir **marcadores** (L.Marker) en el mapa pero por demanda. Mediante el procedimiento básico de añadir una cantidad elevada de marcadores el rendimiento en la generación se veía afectado. La latencia en la carga de la página web era bastante alta.
+
+En el servicio [app/services/views.py](app/app/services/views.py) se encuentran las funciones que generan el nuevo componente con dicha capacidad (L.markerClusterGroup).
+
+```js
+var cluster = L.markerClusterGroup();
+cluster.addMarker(...)
+```
+
+## Endpoints de acceso web
 
 Se han definido los siguientes endpoints de acceso:
 
-* ```[/]``` Acceso principal, realiza:
-  * Peticiones para obtener información de todos **los distritos y tipos de delitos disponibles**
-  * **Genera la información y renderiza el mapa** con los marcadores de las incidencias sobre *generated_map.html*, mostrado como vista.
-* ```[/generated_map/<attribute>]``` Al añadir una etiqueta (distrito/tipo de delito) queremos obtener la información filtrada bajo nuestro criterio. La expresión es construida como json: si añadimos las etiquetas _northern_, _bayview_ y _assault_
+### ```/``` (principal)
+
+  * Peticiones para obtener información de todos **los distritos y tipos de delitos disponibles**.
+
+  * **Genera la información y renderiza el mapa** sobre el html *generated_map.html* cargado a su vez desde el componente **iframe** de index.html. El mapa renderizado contendrá los marcadores de las incidencias producidas por zona.
+
+### ```/generated_map/<attribute>``` Al añadir una etiqueta (distrito/tipo de delito) se obtiene la información filtrada bajo cierto criterio. 
+
+1. Si añadimos las etiquetas _northern_, _bayview_ y _assault_La expresión es construida como json.
 
 ![](docs/tags.png)
 
-  1. Se genera un objeto traducido a _json_ ```{ "district": ["northern", "bayview"] , "category": ["assault"] }```
-  2. Se codifica para obtener un token único para cada tipo de consulta con base64: ```eyAiZGlzdHJpY3QiOiBbIm5vcnRoZXJuIiwgImJheXZpZXciXSAsICJjYXRlZ29yeSI6IFsiYXNzYXVsdCJdIH0=```
-  3. Este token se utiliza para realizar petición de generación de mapa para ese criterio específico **(OJO: MEDIANTE LA UTILIZACIÓN DE UN TOKEN IDENTIFICATIVO SE PODRÍA PERMITIR AÑADIR CACHING SOBRE EL SERVICIO AGILIZANDO LA CONSULTAS QUE SE REPITIERAN)** (Ver Flask-Caching). Si realizamos la llamada a ```/generated_map/eyAiZGlzdHJpY3QiOiBbIm5vcnRoZXJuIiwgImJheXZpZXciXSAsICJjYXRlZ29yeSI6IFsiYXNzYXVsdCJdIH0=``` se genera un único mapa bajo el mismo identificador, único para cada criterio.
+2. Se genera un objeto traducido a _json_ 
+
+```json
+{ "district": ["northern", "bayview"] , "category": ["assault"] }
+```
+
+3. Se codifica para obtener un token único para cada tipo de consulta con base64:
+```
+eyAiZGlzdHJpY3QiOiBbIm5vcnRoZXJuIiwgImJheXZpZXciXSAsICJjYXRlZ29yeSI6IFsiYXNzYXVsdCJdIH0=
+```
+4. Este token se utiliza para realizar la petición de generación de mapa a partir del criterio identificado bajo el. Se genera un único mapa para cada token, único para cada criterio.
+
+```
+GET /generated_map/eyAiZGlzdHJpY3QiOiBbIm5vcnRoZXJuIiwgImJheXZpZXciXSAsICJjYXRlZ29yeSI6IFsiYXNzYXVsdCJdIH0=
+```
+
+**Nota:** Al relacionar cada **criterio** con un **token único** consolidamos el tráfico de información. Nos permitiría guardar en caché cada criterio y su petición (e información vinculante), sin necesidad de realizar peticiones a Cassandra constantemente (Ver [Flask-Caching](https://pythonhosted.org/Flask-Caching/)).
+
+```python
+@cache.cached(timeout=15000, key_prefix='generated_maps_%s')
+@app.route('/generated_map/<attributes>')
+def generated_map(attributes=None):
+    <...>
+    return render_template('generated/generated_map_%s.html' % attributes)
+```
 
 ![](docs/endpoint.png)
 
-* ```[/generated_map]``` Sin filtros. Usado en el acceso principal.
 
 [·volver·](#San.Francisco-Crimes)
 
@@ -71,6 +158,51 @@ Una visión de la arquitectura de nodos de Cassandra y un cluster de la aplicaci
 ### Requisitos para el entorno Docker
 
 * Docker instalado [Windows](https://docs.docker.com/docker-for-windows/install/)/[Mac](https://docs.docker.com/docker-for-mac/install/) y entorno configurado:  ```eval $(docker-machine env default)```
+
+### Instalación de entorno en local
+
+#### Configurar un nodo en cassandra
+
+* Configuración y arranque
+```
+$ ./bin/cassandra
+$ ./bin/nodetool status
+```
+
+* Importación del dataset y la estructura
+
+```
+wget -O mega.py \ https://gist.githubusercontent.com/vrandkode/7a31d261f26c1f6db4ddbb8ea7fbb0cc/raw/2460dee8e50cd148a59277b829eed22f336b1e78/mega.py \
+            && mkdir /datasets && python mega.py 'https://mega.nz/#!GqRlAaRC!r5zOJxSZwXe40ov_7zhqiLqThOij804K9g73y_Q_DaA'
+            && mv mega_GqRlAaRC_incidents.all.csv /datasets/incidents.all.csv'
+```
+
+```
+$ echo "`cat cassandra/docker-entrypoint-initdb.d/init.cql` exit;" | ./bin/cqlsh
+```
+
+#### Configurar y arrancar la aplicación
+
+Referencias: https://cloud.google.com/python/setup
+
+Preparación de las variables de entorno con la información del nodo Cassandra a disposición en 127.0.0.1:9042.
+
+```
+export CASSANDRA_HOST="localhost"
+```
+
+Creación del entorno virtual de Python e instalación de dependencias
+```
+$ virtualenv --python python3 env
+$ source env/bin/activate
+(env) $ pip3 install -r requirements.txt
+```
+
+Arrancar el servidor web en local y acceder a http://localhost:5000
+```
+$ python main.py
+```
+
 
 ### Construir y desplegar un nodo Cassandra
 
@@ -356,7 +488,7 @@ UN  10.32.0.15  584.7 MiB  256          100.0%            9295309b-8004-4ed5-a26
 
 ```
 
-### Importación del dataset
+### Importación del dataset
 
 * Descargar el dataset
 
